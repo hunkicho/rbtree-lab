@@ -10,7 +10,7 @@ rbtree *new_rbtree(void) {
 
 void delete_rbtree(rbtree *t) {
   // TODO: reclaim the tree nodes's memory
-  free(t);ss
+  free(t);
 }
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
