@@ -205,6 +205,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 	z->right = t->nil;
 	z->color = RBTREE_RED;
 	rb_insert_fixup(t, z);
+	
   return t->root;
 }
 
@@ -431,6 +432,7 @@ int rbtree_erase(rbtree *t, node_t *z) {
 	{
 		rb_erase_fixup(t, x);
 	}
+	free(z);
 
   return 0;
 }
