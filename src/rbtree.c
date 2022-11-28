@@ -154,12 +154,12 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 	node_t* x = t->root;
 	node_t* y = t->nil;
 
-	z->key = key;
+	z->key = key;           // 포인터에 키값 주기
 
-	while (x != t->nil)
+	while (x != t->nil)     // 닐노드 안나올 때 까지
 	{
 		y = x;
-		if (z->key < x->key)
+		if (z->key < x->key)        // 삽입할 값이 현재보다 작으면 레프트, 크면 라이트(트리특성)
 		{
 			x = x->left;
 		}
@@ -168,7 +168,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 			x = x->right;
 		}
 	}
-	z->parent = y;
+	z->parent = y;                 //위에서 y에 현재값 넣었
 
 	if (y == t->nil)
 	{
@@ -198,7 +198,7 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
 	// rb tree에서 left child는 parent보다 작고, right child는 parent보다 크다.
 	node_t* first = t->root;
 	//printf("first %d\n", first->key);
-	while (first->key != -1)
+	while (first != t->nil) //여기
 	{
 		if (key == first->key)
 		{
@@ -224,9 +224,9 @@ node_t *rbtree_min(const rbtree *t) {
 	node_t* first = t->root;
 
 	// rb tree에서는 left child는 parent보다 작고 right child는 parent보다 크기 때문에 root에서 nil까지 계속 left 호출
-	while (first->key != -1)
+	while (first != t->nil) //여기
 	{
-		if (first->left->key == -1) {
+		if (first->left == t->nil) {  //여기
 			break;
 		}
 		first = first->left;
@@ -240,9 +240,9 @@ node_t *rbtree_max(const rbtree *t) {
 	node_t* first = t->root;
 
 	// rb tree에서는 left child는 parent보다 작고 right child는 parent보다 크기 때문에 root에서 nil까지 계속 right 호출
-	while (first->key != -1)
+	while (first != t->nil)  //여기
 	{
-		if (first->right->key == -1) {
+		if (first->right == t->nil) { //여기
 			break;
 		}
 		first = first->right;
@@ -250,11 +250,11 @@ node_t *rbtree_max(const rbtree *t) {
 	return first;
 }
 
-node_t *min_subtree(node_t *n) {
+node_t *min_subtree(rbtree *t, node_t *n) {
 	//printf("min_subtree 진입!!!!\n");
-	while (n->left->key != -1)
+	while (n->left != t->nil)  //여기
 	{
-		if (n->left->key == -1)
+		if (n->left == t->nil)  //여기
 		{
 			break;
 		}
@@ -264,11 +264,11 @@ node_t *min_subtree(node_t *n) {
 	return n;
 }
 
-node_t *max_subtree(node_t *n) {
+node_t *max_subtree(rbtree *t, node_t *n) {
 	//printf("max_subtree 진입!!!!\n");
-	while (n->right->key != -1)
+	while (n->right != t->nil)  //여기
 	{
-		if (n->right->key == -1)
+		if (n->right == t->nil)  //여기
 		{
 			break;
 		}
@@ -395,7 +395,7 @@ int rbtree_erase(rbtree *t, node_t *z) {
 	}
 	else
 	{
-		y = min_subtree(z->right);
+		y = min_subtree(t, z->right);
 		og_color = y->color;
 		x = y->right;
 		if (y->parent == z)
@@ -423,63 +423,19 @@ int rbtree_erase(rbtree *t, node_t *z) {
 	return 0;
 }
 
-key_t *inorder(node_t* node, const size_t n, int num) {
-	key_t *rtn_arr = malloc(n * sizeof(key_t));
 
-	// if (node->key == -1)
-	// {
-	// 	printf("닐노드 온듯?\n");
-	// 	for (int i = 0; i < n; i++) {
-    // 		printf("%d,",rtn_arr[i]);
-  	// 	}
-	// 	printf("\n");
-	// 	return 0;
-	// }
-
-	printf("루트 받아왔나? %d\n", node->key);
-
-	if(node->left->key != -1)
-	{
-		inorder(node->left, n, num);
-	}
-	
-	if(node->key != -1)
-	{
-		rtn_arr[n] = node->key;
-	}
-
-	if(node->right->key != -1)
-	{
-		inorder(node->right, n, num);
-	}
-
-	num++;
-	printf("%d 번쨰\n",num);
-
-	if (num > n)
-	{
-		printf("제대로 왔습니다\n");
-		for (int i = 0; i < n; i++) {
-    		printf("%d,",rtn_arr[i]);
-  		}
-		printf("\n");
-		return rtn_arr;
-	}
-	printf("뭔가 오류가 있는듯\n");
-	return 0;
-}
 
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
 	//printf("rbtree_to_array 진입!!!!\n");
 	// TODO: implement to_array
 
-	arr = inorder(t->root, n, 0);
+	//arr = inorder(t->root, n, 0);
 
-	// for (int i = 0; i < n; i++) {
-	// 	node_t * node = rbtree_min(t);
-	// 	arr[i] = node->key;
-	// 	rbtree_erase((rbtree *)t,rbtree_min(t));
-	// }
+	for (int i = 0; i < n; i++) {
+		node_t * node = rbtree_min(t);
+		arr[i] = node->key;
+		rbtree_erase((rbtree *)t,rbtree_min(t));
+	}
 	return 0;
 }
 
