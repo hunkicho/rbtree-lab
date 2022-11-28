@@ -237,6 +237,43 @@ node_t *rbtree_max(const rbtree *t) {
   return max;
 }
 
+// 서브 트리의 min,max / transplant -------------------------------------------------------------------
+
+node_t* sub_min(rbtree* t, node_t* node){
+
+  node_t* sub_min_node = node; // 서브 트리의 min값을 담을 노드 포인터
+
+  while (sub_min_node->left != t->nil){
+    sub_min_node = sub_min_node->left;
+  }
+
+  return sub_min_node;
+}
+
+node_t* sub_max(rbtree* t, node_t* node){
+
+  node_t* sub_max_node = node;
+
+  while (sub_max_node->right != t->nil){
+    sub_max_node = sub_max_node->right;
+  }
+
+  return sub_max_node;
+}
+
+static void transplant(rbtree* t, node_t* u, node_t* v){
+  // u의 위치에 따라 v의 세부 정보를 세팅
+  if (u->parent == t->nil){
+    t->root = v;
+  }else if (u == u->parent->left){
+    u->parent->left = v;
+  }else{
+    u->parent->right = v;
+  }
+  // v부모에 u부모 대입
+  v->parent = u->parent;
+}
+
 // 트리 원소 삭제 -------------------------------------------------------------------------------------
 
 int rbtree_erase(rbtree *t, node_t *p) {
