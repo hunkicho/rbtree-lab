@@ -69,7 +69,7 @@ static void left_rotation(rbtree* t, node_t* x){
   x->parent = y;
 }
 
-static void right_rotaion(rbtree* t, node_t* y){ // left와 반대로 하면 된다.
+static void right_rotation(rbtree* t, node_t* y){ // left와 반대로 하면 된다.
   node_t* x = y->left;
   y->left = x->right;
 
@@ -91,11 +91,94 @@ static void right_rotaion(rbtree* t, node_t* y){ // left와 반대로 하면 된
   y->parent = x;
 }
 
+// 트리 원소 추가 fix 함수 ----------------------------------------------------------------------------
+
+static void rb_insert_fix(rbtree *t, node_t* z){
+
+  node_t * y; // 삼촌 노드의 포인터를 받을 포인터 변수
+
+  while (z->parent->color == RBTREE_RED){ // 부모가 레드가 아닐때 까지
+
+    if (z->parent == z->parent->parent->left){ // z가 z부모의 왼쪽 자식일 경우
+
+      y = z->parent->parent->right; // y에 z삼촌을 대입
+
+      if (y->color == RBTREE_RED){ // y가 red면 recolor해준다.
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
+      }
+      else if (z == z->parent->right){ // y가 black이면 로테이션 함수를 통해 트리 재정립
+        z = z->parent;
+        left_rotation(t,z);
+      }
+      z->parent->color = RBTREE_BLACK;
+      z->parent->parent->color = RBTREE_RED;
+      right_rotation(t,z->parent->parent);
+    }
+    else{ // z가 z부모의 오른쪽 자식일 경우 위와 반대
+      y = z->parent->parent->left;
+
+      if (y->color == RBTREE_RED){
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
+      }
+      else if (z == z->parent->left){
+        z = z->parent;
+        right_rotation(t, z);
+      }
+      z->parent->color = RBTREE_BLACK;
+      z->parent->parent->color = RBTREE_RED;
+      left_rotation(t, z->parent->parent);
+    }
+  }
+  t->root->color = RBTREE_BLACK; // 마지막에 혹시 root의 색깔이 red로 변했을수도 있으니 다시 black으로 칠한다.
+}
+
+
 // 트리 원소 추가 -------------------------------------------------------------------------------------
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
-  return t->root;
+  // key값을 가진 새로운 노드 z 생성
+  node_t * z = (node_t*)calloc(1,sizeof(node_t));
+  z->key = key;
+
+  // 새로운 노드의 자리를 잡기 위해 필요한 포인터들 초기값 세팅
+  node_t* x = t->root;
+  node_t* y = t->nil;
+
+  // 새로운 값이 들어갈 자리를 while문으로 찾는다.
+  while (x != t->nil){
+    y = x;
+    if (z->key < x->key){
+      x = x->left;
+    }else{
+      x = x->right;
+    }
+  }
+
+  z->parent = y; // 들어갈 자리를 찾았다면 z의 부모로 y를 대입
+
+  // y의 조건에 따라 z위치 정립
+  if (y == t->nil){
+    t->root = z;
+  }else if (z->key < y->key){
+    y->left = z;
+  }else{
+    y->right = z;
+  }
+  // 자리를 잡았다면 이제 z의 세부정보 세팅
+  z->color = RBTREE_RED;
+  z->left = t->nil;
+  z->right = t->nil;
+
+  // z로 인해 생길수 있는 rb트리 조건의 위법이 있나 확인후 있으면 처리하기 위해 fix함수 호출
+  rb_insert_fix(t, z);
+
+  return z;
 }
 
 // 트리 원소 찾기 -------------------------------------------------------------------------------------
