@@ -36,11 +36,59 @@ void delete_rbtree(rbtree *t) {
   // 빈 트리가 아니라면 루트값을 node삭제 함수로 보낸다.
   if(t->root != t->nil){
     delete_node(t,t->root);
+    free(t->nil);
   }else{ 
     free(t->root); // 빈 트리라면 root와 nil 그리고 트리 t를 차례로 지워준다.
   }
-  free(t->nil);
   free(t);
+}
+// rotation 함수 ---------------------------------------------------------------------------------------
+
+static void left_rotation(rbtree* t, node_t* x){
+  // 왼쪽 회전이니깐 오른쪽 자식을 포인터 변수에 담는다.
+  node_t* y = x->right;
+
+  x->right = y->left; // 원래 있던 x의 오른쪽 자식에 y의 왼쪽 자식 파양
+
+  // y의 왼쪽 자식이 있다면 부모를 x로 변경
+  if (y->left != t->nil){
+    y->left->parent = x;
+  }
+
+  y->parent = x->parent; // y의 부모로 x의 부모로 변경
+
+  if (x->parent == t->nil){ // x의 부모가 없다면 x가 루트였다는 소리니깐 root값에 y대입
+    t->root = y;
+  }else if (x == x->parent->left){ // x가 부모의 어느 자식이었는지 확인후 그자리에 y대입
+    x->parent->left = y;
+  }else{
+    x->parent->right = y;
+  }
+  // y의 왼쪽에 x를 넣고 x의 부모를 y로 설정
+  y->left = x;
+  x->parent = y;
+}
+
+static void right_rotaion(rbtree* t, node_t* y){ // left와 반대로 하면 된다.
+  node_t* x = y->left;
+  y->left = x->right;
+
+  if (x->right != t->nil){
+    x->right->parent = y;
+  }
+
+  x->parent = y->parent;
+
+  if (y->parent == t->nil){
+    t->root = x;
+  }else if (y == y->parent->left){
+    y->parent->left = x;
+  }else{
+    y->parent->right = x;
+  }
+  
+  x->right = y;
+  y->parent = x;
 }
 
 // 트리 원소 추가 -------------------------------------------------------------------------------------
@@ -121,7 +169,7 @@ void ino(const rbtree* t, node_t* node, key_t *arr, const size_t n, int *count){
   }
 
   ino(t, node->left, arr, n, count);
-  if (count < n){
+  if (*count < n){
     arr[*count] = node->key;
     (*count)++;
   }else{
