@@ -136,6 +136,7 @@ void test_to_array(rbtree *t, const key_t *arr, const size_t n) {
   key_t *res = calloc(n, sizeof(key_t));
   rbtree_to_array(t, res, n);
   for (int i = 0; i < n; i++) {
+    printf("원래배열: %d  변환배열: %d\n", arr[i], res[i]);
     assert(arr[i] == res[i]);
   }
   free(res);
