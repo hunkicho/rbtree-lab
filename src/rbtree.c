@@ -271,10 +271,6 @@ node_t *min_subtree(rbtree *t, node_t *n) {
 	//printf("min_subtree 진입!!!!\n");
 	while (n->left != t->nil)  //여기
 	{
-		if (n->left == t->nil)  //여기
-		{
-			break;
-		}
 		n = n->left;
 	}
 
@@ -285,10 +281,6 @@ node_t *max_subtree(rbtree *t, node_t *n) {
 	//printf("max_subtree 진입!!!!\n");
 	while (n->right != t->nil)  //여기
 	{
-		if (n->right == t->nil)  //여기
-		{
-			break;
-		}
 		n = n->right;
 	}
 
