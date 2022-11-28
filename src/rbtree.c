@@ -1,6 +1,7 @@
 #include "rbtree.h"
 
 #include <stdlib.h>
+// 트리 생성 ------------------------------------------------------------------------------------------------
 
 rbtree *new_rbtree(void) {
   rbtree *tree = (rbtree *)calloc(1, sizeof(rbtree));
@@ -15,6 +16,8 @@ rbtree *new_rbtree(void) {
 
   return tree;
 }
+
+// 트리,노드 메모리 삭제 -------------------------------------------------------------------------------------
 
 void delete_node(rbtree* t, node_t*node){
   // 왼쪽 자식이 있다면
@@ -40,10 +43,14 @@ void delete_rbtree(rbtree *t) {
   free(t);
 }
 
+// 트리 원소 추가 -------------------------------------------------------------------------------------
+
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert
   return t->root;
 }
+
+// 트리 원소 찾기 -------------------------------------------------------------------------------------
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   // 구성 요소가 없을 경우
@@ -66,6 +73,8 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
   return NULL;
 }
 
+// 원소 최소값 찾기 -------------------------------------------------------------------------------------
+
 node_t *rbtree_min(const rbtree *t) {
   // 트리를 구성하는 원소가 하나도 없을 경우
   if (t->root == t->nil){
@@ -79,6 +88,8 @@ node_t *rbtree_min(const rbtree *t) {
   }
   return min;
 }
+
+// 원소 최대값 찾기 -------------------------------------------------------------------------------------
 
 node_t *rbtree_max(const rbtree *t) {
   // 트리를 구성하는 원소가 없을 경우
@@ -95,12 +106,44 @@ node_t *rbtree_max(const rbtree *t) {
   return max;
 }
 
+// 트리 원소 삭제 -------------------------------------------------------------------------------------
+
 int rbtree_erase(rbtree *t, node_t *p) {
   // TODO: implement erase
   return 0;
 }
 
+// 트리 배열 확인 -------------------------------------------------------------------------------------
+
+void ino(const rbtree* t, node_t* node, key_t *arr, const size_t n, int *count){
+  if (node == t->nil){
+    return;
+  }
+
+  ino(t, node->left, arr, n, count);
+  if (count < n){
+    arr[*count] = node->key;
+    (*count)++;
+  }else{
+    return;
+  }
+  ino(t, node->right, arr, n, count);
+}
+
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
-  // TODO: implement to_array
-  return 0;
+  // 빈 트리
+  if (t->root == t->nil){
+    return 0;
+  }
+
+  int count = 0;
+  ino(t, t->root, arr, n, &count);
+
+  // 배열이 다 채워졌는지 확인
+  for (int i = 0; i < n; i++){ 
+    if (arr[i] == 0){
+      return 0;
+    }
+  }
+  return 1;
 }
