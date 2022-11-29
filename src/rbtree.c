@@ -109,13 +109,15 @@ static void rb_insert_fix(rbtree *t, node_t* z){
         z->parent->parent->color = RBTREE_RED;
         z = z->parent->parent;
       }
-      else if (z == z->parent->right){ // y가 black이면 로테이션 함수를 통해 트리 재정립
-        z = z->parent;
-        left_rotation(t,z);
+      else {
+        if (z == z->parent->right){ // y가 black이면 로테이션 함수를 통해 트리 재정립
+          z = z->parent;
+          left_rotation(t,z);
+        }
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        right_rotation(t,z->parent->parent);
       }
-      z->parent->color = RBTREE_BLACK;
-      z->parent->parent->color = RBTREE_RED;
-      right_rotation(t,z->parent->parent);
     }
     else{ // z가 z부모의 오른쪽 자식일 경우 위와 반대
       y = z->parent->parent->left;
@@ -126,14 +128,15 @@ static void rb_insert_fix(rbtree *t, node_t* z){
         z->parent->parent->color = RBTREE_RED;
         z = z->parent->parent;
       }
-      else if (z == z->parent->left){
-
-        z = z->parent;
-        right_rotation(t, z);
+      else{
+        if (z == z->parent->left){
+          z = z->parent;
+          right_rotation(t, z);
+        }
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        left_rotation(t, z->parent->parent);
       }
-      z->parent->color = RBTREE_BLACK;
-      z->parent->parent->color = RBTREE_RED;
-      left_rotation(t, z->parent->parent);
     }
   }
   t->root->color = RBTREE_BLACK; // 마지막에 혹시 root의 색깔이 red로 변했을수도 있으니 다시 black으로 칠한다.
