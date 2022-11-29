@@ -283,34 +283,48 @@ static void transplant(rbtree* t, node_t* u, node_t* v){
 // 트리 원소 삭제 fix 함수 ----------------------------------------------------------------------------
 
 static void rb_delete_fix(rbtree *t, node_t* x){
-  node_t* w;
+
+  node_t* w; // 대체 노드를 저장하는 포인터
 
   while (x != t->root && x->color == RBTREE_BLACK){
+
+    // x가 x.p의 왼쪽 자식일 경우
     if (x == x->parent->left){
       w = x->parent->right;
+
+      // Doubly black : Case 1 (case 2번 형태로 변환하는 과정)
       if (w->color == RBTREE_RED){
         w->color = RBTREE_BLACK;
         w->parent->color = RBTREE_RED;
         left_rotation(t,x->parent);
         w = x->parent->right;
       }
+
+      // Doubly black : Case 2
       if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK){
         w->color = RBTREE_RED;
         x = x->parent;
-      }else{
+      }
+      
+      // Doubly black : Case 3 (case 4번 형태로 변환 하는 과정)
+      else{
         if (w->right->color == RBTREE_BLACK){
           w->left->color = RBTREE_BLACK;
           w->color =RBTREE_RED;
           right_rotation(t,w);
           w = x->parent->right;
         }
+
+        // Doubly black : Case 4
         w->color = x->parent->color;
         x->parent->color = RBTREE_BLACK;
         w->right->color = RBTREE_BLACK;
         left_rotation(t,x->parent);
-        x = t->root;
+        x = t->root; // while문을 빠져 나오기 위해 x에 root대입
       }
-    }else{
+    }
+    // x가 x.p의 오른쪽 자식일 경우(위와 반대)
+    else{
       w = x->parent->left;
       if (w->color == RBTREE_RED){
         w->color = RBTREE_BLACK;
@@ -336,6 +350,7 @@ static void rb_delete_fix(rbtree *t, node_t* x){
       }
     }
   }
+  // red-and-black 해결 방법
   x->color = RBTREE_BLACK;
 }
 
