@@ -114,51 +114,51 @@ void rb_insert_fixup(rbtree *t, node_t *z) {
 	node_t* y;
 
 
-	while (z->parent->color == RBTREE_RED)
+	while (z->parent->color == RBTREE_RED)             // z의 부모가 red이면 조상도 반드시 존재(rb트리의 루트는 black이기 때문에)
 	{
-		if (z->parent == z->parent->parent->left)
+		if (z->parent == z->parent->parent->left)       //삽입된 원소의 부모가 조상의 leftchild면
 		{
-			y = z->parent->parent->right;
+			y = z->parent->parent->right;               //y설정 - 삽입된 원소의 조상의 rightchild(uncle)
 
-			if (y->color == RBTREE_RED)
+			if (y->color == RBTREE_RED)                 //uncle이 red면
 			{
-				z->parent->color = RBTREE_BLACK;
-				y->color = RBTREE_BLACK;
-				z->parent->parent->color = RBTREE_RED;
-				z = z->parent->parent;
+				z->parent->color = RBTREE_BLACK;        //부모도 검은색
+				y->color = RBTREE_BLACK;                //uncle도 검은색
+				z->parent->parent->color = RBTREE_RED;  //조상을 red
+				z = z->parent->parent;                  //위치를 조상으로 옮김
 			}
-			else
+			else                                        // uncle이 black이면
 			{
-				if (z == z->parent->right)
+				if (z == z->parent->right)              //내가 부모의 rightchild면
 				{
-					z = z->parent;
+					z = z->parent;                      // 위치를 부모로 옮김
 					left_rotation(t, z);
 				}
-				z->parent->color = RBTREE_BLACK;
-				z->parent->parent->color = RBTREE_RED;
+				z->parent->color = RBTREE_BLACK;        //부모를 black으로
+				z->parent->parent->color = RBTREE_RED;  //조상을 red로
 				right_rotation(t, z->parent->parent);
 			}
 		}
-		else
+		else                                           //삽입된 원소의 부모가 조상의 rightchild면
 		{
-			y = z->parent->parent->left;
+			y = z->parent->parent->left;               //y설정 - 삽입된 원소의 조상의 leftchild(uncle)
 
-			if (y->color == RBTREE_RED)
+			if (y->color == RBTREE_RED)                //uncle이 red면
 			{
-				z->parent->color = RBTREE_BLACK;
-				y->color = RBTREE_BLACK;
-				z->parent->parent->color = RBTREE_RED;
-				z = z->parent->parent;
+				z->parent->color = RBTREE_BLACK;       //부모도 검은색
+				y->color = RBTREE_BLACK;               //uncle도 검은색
+				z->parent->parent->color = RBTREE_RED; //조상을 red
+				z = z->parent->parent;                 //위치를 조상으로 옮김
 			}
 			else
 			{
-				if (z == z->parent->left)
+				if (z == z->parent->left)              //내가 부모의 leftchild면
 				{
-					z = z->parent;
+					z = z->parent;                     // 위치를 부모로 옮김
 					right_rotation(t, z);
 				}
-				z->parent->color = RBTREE_BLACK;
-				z->parent->parent->color = RBTREE_RED;
+				z->parent->color = RBTREE_BLACK;       //부모를 black으로
+				z->parent->parent->color = RBTREE_RED; //조상을 red
 				left_rotation(t, z->parent->parent);
 			}
 		}
@@ -176,7 +176,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
 
 	while (x != t->nil)     // 닐노드 안나올 때 까지
 	{
-		y = x;
+		y = x;                      // y가 x의 부모가 되도록(삽입할 위치를 설정하기 위해)
 		if (z->key < x->key)        // 삽입할 값이 현재보다 작으면 레프트, 크면 라이트(트리특성)
 		{
 			x = x->left;
