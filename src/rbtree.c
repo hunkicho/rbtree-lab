@@ -1,5 +1,5 @@
 #include "rbtree.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 // 트리 생성 ------------------------------------------------------------------------------------------------
 
@@ -127,6 +127,7 @@ static void rb_insert_fix(rbtree *t, node_t* z){
         z = z->parent->parent;
       }
       else if (z == z->parent->left){
+
         z = z->parent;
         right_rotation(t, z);
       }
@@ -250,6 +251,7 @@ node_t* sub_min(rbtree* t, node_t* node){
   return sub_min_node;
 }
 
+/* 현재 코드에서는 sub_min만 사용하므로 sub_max는 사용하지 않는다.
 node_t* sub_max(rbtree* t, node_t* node){
 
   node_t* sub_max_node = node;
@@ -260,6 +262,7 @@ node_t* sub_max(rbtree* t, node_t* node){
 
   return sub_max_node;
 }
+*/
 
 static void transplant(rbtree* t, node_t* u, node_t* v){
   // u의 위치에 따라 v의 세부 정보를 세팅
@@ -274,10 +277,123 @@ static void transplant(rbtree* t, node_t* u, node_t* v){
   v->parent = u->parent;
 }
 
+// 트리 원소 삭제 fix 함수 ----------------------------------------------------------------------------
+
+static void rb_delete_fix(rbtree *t, node_t* x){
+  node_t* w;
+
+  while (x != t->root && x->color == RBTREE_BLACK){
+    if (x == x->parent->left){
+      w = x->parent->right;
+      if (w->color == RBTREE_RED){
+        w->color = RBTREE_BLACK;
+        w->parent->color = RBTREE_RED;
+        left_rotation(t,x->parent);
+        w = x->parent->right;
+      }
+      if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK){
+        w->color = RBTREE_RED;
+        x = x->parent;
+      }else{
+        if (w->right->color == RBTREE_BLACK){
+          w->left->color = RBTREE_BLACK;
+          w->color =RBTREE_RED;
+          right_rotation(t,w);
+          w = x->parent->right;
+        }
+        w->color = x->parent->color;
+        x->parent->color = RBTREE_BLACK;
+        w->right->color = RBTREE_BLACK;
+        left_rotation(t,x->parent);
+        x = t->root;
+      }
+    }else{
+      w = x->parent->left;
+      if (w->color == RBTREE_RED){
+        w->color = RBTREE_BLACK;
+        w->parent->color = RBTREE_RED;
+        right_rotation(t,x->parent);
+        w = x->parent->left;
+      }
+      if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK){
+        w->color = RBTREE_RED;
+        x = x->parent;
+      }else{
+        if (w->left->color == RBTREE_BLACK){
+          w->right->color =RBTREE_BLACK;
+          w->color = RBTREE_RED;
+          left_rotation(t, w);
+          w = x->parent->left;
+        }
+        w->color = x->parent->color;
+        x->parent->color = RBTREE_BLACK;
+        w->left->color = RBTREE_BLACK;
+        right_rotation(t, x->parent);
+        x = t->root;
+      }
+    }
+  }
+  x->color = RBTREE_BLACK;
+}
+
+
 // 트리 원소 삭제 -------------------------------------------------------------------------------------
 
-int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
+int rbtree_erase(rbtree *t, node_t *z) {
+
+  node_t* y; // 삭제할 z노드의 대체 노드를 정할 포인터
+  node_t* x; // 대체 노드의 오른쪽 자식을 정할 포인터
+  color_t original_col; // 대체 노드의 색깔
+
+  // 초기값 세팅
+  y = z;
+  original_col = z->color;
+
+  // 삭제할 노드가 트리에 없다면 바로 리턴
+  if (rbtree_find(t, z->key) == NULL){
+    printf("No key \n");
+    return 0;
+  }
+
+  // 삭제할 노드가 자식이 1개면 그 남은 자식을 y노드로 설정 후 z,y의 transplant
+  if (z->left == t->nil){
+    x = z->right;
+    transplant(t,z,x);
+  }else if (z->right == t->nil){
+    x = z->left;
+    transplant(t,z,x);
+  }
+  // 삭제할 노드가 자식이 2개일 경우
+  else{
+    // 대체 할 노드 y를 다시 찾고 대입
+
+    y = sub_min(t,z->right);
+    original_col = y->color;
+    x = y->right;
+
+    // 대체 노드의 조건에 따라 재세팅
+    if (y->parent == z){
+      x->parent = y;
+    }else{
+      transplant(t,y,x);
+      y->right = z->right;
+      y->right->parent = y;
+    }
+    // 세팅이 끝나면 z,y를 transplant
+    transplant(t,z,y);
+    y->left = z->left;
+    y->left->parent = y;
+    y->color = z->color;
+  }
+
+  // 노드를 삭제하고 난 후 트리의 조건에 위배되는 부분이 있으면 fix함수로 트리 재정립
+  if (original_col == RBTREE_BLACK){
+    rb_delete_fix(t,x);
+  }
+
+  // 삭제한 노드의 메모리는 반납
+  free(z);
+
   return 0;
 }
 
