@@ -311,37 +311,37 @@ void rb_erase_fixup(rbtree *t, node_t *x)
 	node_t* w;
 	while (x != t->root && x->color == RBTREE_BLACK)
 	{
-		if (x == x->parent->left)
+		if (x == x->parent->left)                                                            // 왼쪽 자식일 때
 		{
 			w = x->parent->right;
 
-			if (w->color == RBTREE_RED)
+			if (w->color == RBTREE_RED)                           // 경우 1:  형제가 red면
 			{
-				w->color = RBTREE_BLACK;
-				x->parent->color = RBTREE_RED;
-				left_rotation(t, x->parent);
-				w = x->parent->right;
+				w->color = RBTREE_BLACK;                           //형제를 black으로 변경
+				x->parent->color = RBTREE_RED;                     // 부모를 red로 변경
+				left_rotation(t, x->parent);                       // 좌회전
+				w = x->parent->right;                              // 새로운 형제 설정
 			}
 
-			if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK)
+			if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK)    // 경우2: 형제의 모든 자식이 black이면
 			{
-				w->color = RBTREE_RED;
-				x = x->parent;
+				w->color = RBTREE_RED;                  // 형제를 red로
+				x = x->parent;                          // 조건 대상을 부모로(더블블랙을 위로)
 			}
 			else
 			{
-				if (w->right->color == RBTREE_BLACK)
+				if (w->right->color == RBTREE_BLACK)              // 경우3: 형제의 오른쪽이 black, 왼쪽이 red
 				{
 					w->left->color = RBTREE_BLACK;
 					w->color = RBTREE_RED;
 					right_rotation(t, w);
-					w = x->parent->right;
-				}
-				w->color = x->parent->color;
+					w = x->parent->right;                         // 경우 4로 가버린다.
+				}                                                 // 경우 : 형제의 왼쪽이 black, 오른쪽이 red
+				w->color = x->parent->color;            
 				x->parent->color = RBTREE_BLACK;
 				w->right->color = RBTREE_BLACK;
 				left_rotation(t, x->parent);
-				x = t->root;
+				x = t->root;           // while을 빠져나가기 위한 구문
 			}
 		}
 		else
