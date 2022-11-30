@@ -341,7 +341,7 @@ void rb_erase_fixup(rbtree *t, node_t *x)
 				x->parent->color = RBTREE_BLACK;
 				w->right->color = RBTREE_BLACK;
 				left_rotation(t, x->parent);
-				x = t->root;           // while을 빠져나가기 위한 구문
+				x = t->root;           // while을 빠져나가기 위한 구문(실제 루트를 바꾼건 아니다.)
 			}
 		}
 		else
